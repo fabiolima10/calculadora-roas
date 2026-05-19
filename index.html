@@ -627,26 +627,128 @@
     .c-muted  { color: var(--text-muted) !important; }
 
     /* ═══════════════════════════════════════════
-       RESPONSIVE
+       RESPONSIVE — TABLET (≤ 860px)
     ═══════════════════════════════════════════ */
     @media (max-width: 860px) {
+      /* Layout: empilha em coluna única */
       .app-body {
         grid-template-columns: 1fr;
         height: auto;
       }
+
       .inputs-panel {
         border-right: none;
         border-bottom: 1px solid var(--border);
+        padding: 20px 16px 32px;
       }
-      .app-header { padding: 0 18px; }
-      .header-hint { display: none; }
-      .inputs-panel, .results-panel { padding: 20px 18px 40px; }
-      .roas-number { font-size: 52px; }
+
+      .results-panel {
+        padding: 20px 16px 40px;
+      }
+
+      /* Header compacto */
+      .app-header {
+        padding: 0 16px;
+        height: 52px;
+      }
+
+      .header-title { font-size: 15px; }
+      .header-hint  { display: none; }
+
+      /* ROAS hero menor */
+      .roas-number { font-size: 54px; }
+      .roas-hero   { padding: 24px 20px 20px; }
+
+      /* Inputs: área de toque maior */
+      .inp-row { padding: 11px 10px; }
+      input[type="number"] { width: 84px; padding: 7px 8px; font-size: 14px; }
     }
 
-    @media (max-width: 480px) {
-      .metrics-grid { grid-template-columns: 1fr; }
-      .ebitda-card { flex-direction: column; align-items: flex-start; gap: 12px; }
+    /* ═══════════════════════════════════════════
+       RESPONSIVE — MOBILE (≤ 540px)
+    ═══════════════════════════════════════════ */
+    @media (max-width: 540px) {
+      /* Header */
+      .app-header  { height: 50px; padding: 0 14px; }
+      .header-title { font-size: 14px; letter-spacing: -.02em; }
+      .theme-toggle { width: 32px; height: 32px; border-radius: 8px; }
+
+      /* Painéis */
+      .inputs-panel  { padding: 16px 12px 28px; }
+      .results-panel { padding: 16px 12px 36px; }
+
+      /* ROAS hero */
+      .roas-hero      { padding: 20px 16px 18px; border-radius: 12px; margin-bottom: 12px; }
+      .roas-number    { font-size: 52px; }
+      .roas-eyebrow   { font-size: 8px; margin-bottom: 6px; }
+      .roas-unit      { font-size: 10px; }
+      .roas-tagline   { font-size: 10px; margin-top: 8px; }
+      .roas-gauge     { margin-top: 12px; gap: 4px; }
+      .gauge-pip      { max-width: 38px; }
+
+      /* Grid de métricas: 2 colunas no mobile */
+      .metrics-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      .metric-card    { padding: 12px 12px; border-radius: 8px; }
+      .metric-label   { font-size: 8px; }
+      .metric-value   { font-size: 15px; }
+      .metric-sub     { font-size: 10px; }
+
+      /* Seções de input */
+      .inp-section        { margin-bottom: 12px; }
+      .inp-section-header { padding: 8px 10px; border-radius: 7px; }
+      .inp-section-title  { font-size: 9px; letter-spacing: .1em; }
+
+      /* Linhas de input: toque fácil */
+      .inp-row   { padding: 12px 10px; border-radius: 6px; }
+      .inp-label { font-size: 13px; }
+      .inp-affix { font-size: 12px; }
+
+      input[type="number"] {
+        width: 90px;
+        padding: 8px 10px;
+        font-size: 15px;
+        border-radius: 7px;
+      }
+
+      /* Seções de resultado */
+      .result-section         { margin-bottom: 10px; }
+      .result-section-head    { padding: 9px 12px; border-radius: 7px 7px 0 0; }
+      .rsh-title              { font-size: 9px; }
+      .rsh-total              { font-size: 12px; }
+      .result-row             { padding: 9px 12px; }
+      .result-row-label       { font-size: 12px; }
+      .result-row-value       { font-size: 12px; }
+
+      /* Margem de contribuição */
+      .contrib-card  { padding: 14px 12px; border-radius: 8px; margin-bottom: 10px; }
+      .contrib-value { font-size: 20px; }
+      .contrib-pct   { font-size: 11px; }
+
+      /* Lucro (EBITDA card) */
+      .ebitda-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 16px 14px;
+        border-radius: 10px;
+      }
+      .ebitda-brl { font-size: 22px; }
+      .ebitda-pct { font-size: 13px; }
+      .ebitda-label { font-size: 9px; }
+    }
+
+    /* ═══════════════════════════════════════════
+       RESPONSIVE — MOBILE PEQUENO (≤ 375px)
+    ═══════════════════════════════════════════ */
+    @media (max-width: 375px) {
+      .roas-number { font-size: 44px; }
+      .metrics-grid { gap: 6px; }
+      .metric-value { font-size: 14px; }
+      input[type="number"] { width: 80px; font-size: 14px; }
     }
   </style>
 </head>
