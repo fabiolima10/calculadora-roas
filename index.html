@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de ROAS — Estampa de Afeto</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <style>
+    /* ═══════════════════════════════════════════
+       THEME TOKENS
+    ═══════════════════════════════════════════ */
+    :root {
+      --transition-theme: background .25s ease, color .25s ease,
+                          border-color .25s ease, box-shadow .25s ease;
+    }
+
+    /* Dark theme (default) */
+    [data-theme="dark"] {
+      --bg:           #0C0C10;
+      --surface:      #141419;
+      --surface-2:    #1C1C24;
+      --surface-hover:#1F1F28;
+      --border:       rgba(255,255,255,0.06);
+      --border-md:    rgba(255,255,255,0.11);
+      --text:         #EEECE6;
+      --text-muted:   #807D78;
+      --text-dim:     #4A4845;
+      --shadow-sm:    0 1px 3px rgba(0,0,0,.4);
+      --shadow-md:    0 4px 16px rgba(0,0,0,.5);
+      --header-bg:    rgba(12,12,16,0.90);
+
+      --invest-hdr:   #2B2B2B;
+      --variable-hdr: #C94130;
+      --fixed-hdr:    #C97B20;
+      --fixed-result-bg:   rgba(241,156,73,.10);
+      --fixed-result-bdr:  rgba(241,156,73,.18);
+      --fixed-result-text: #F5A94E;
+
+      --green:   #6DBE5F;
+      --orange:  #F5A33A;
+      --red:     #E24B38;
+      --blue:    #4F8EF7;
+      --blue-bg: rgba(79,142,247,.06);
+      --blue-hover: rgba(79,142,247,.14);
+    }
+
+    /* Light theme */
+    [data-theme="light"] {
+      --bg:           #F4F2EE;
+      --surface:      #FFFFFF;
+      --surface-2:    #EAE8E3;
+      --surface-hover:#F0EEE9;
+      --border:       rgba(0,0,0,0.08);
+      --border-md:    rgba(0,0,0,0.13);
+      --text:         #1A1814;
+      --text-muted:   #6B6760;
+      --text-dim:     #B0ADA8;
+      --shadow-sm:    0 1px 3px rgba(0,0,0,.07);
+      --shadow-md:    0 4px 20px rgba(0,0,0,.10);
+      --header-bg:    rgba(244,242,238,0.92);
+
+      --invest-hdr:   #3A3A3A;
+      --variable-hdr: #C94130;
+      --fixed-hdr:    #C97B20;
+      --fixed-result-bg:   rgba(201,123,32,.08);
+      --fixed-result-bdr:  rgba(201,123,32,.20);
+      --fixed-result-text: #B8690E;
+
+      --green:   #2E9E21;
+      --orange:  #C97B20;
+      --red:     #C93120;
+      --blue:    #1A6CF5;
+      --blue-bg: rgba(26,108,245,.05);
+      --blue-hover: rgba(26,108,245,.12);
+    }
+
+    /* ═══════════════════════════════════════════
+       RESET & BASE
+    ═══════════════════════════════════════════ */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-size: 14px; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      transition: var(--transition-theme);
+    }
+
+    /* ═══════════════════════════════════════════
+       HEADER
+    ═══════════════════════════════════════════ */
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      height: 58px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--header-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      transition: var(--transition-theme);
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .header-eyebrow {
+      font-size: 9px;
+      letter-spacing: .35em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      font-weight: 500;
+    }
+
+    .header-title {
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: -.025em;
+      color: var(--text);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-hint {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'DM Mono', monospace;
+      border: 1px solid var(--border-md);
+      border-radius: 40px;
+      padding: 5px 13px;
+      transition: var(--transition-theme);
+    }
+
+    .hint-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--blue);
+      box-shadow: 0 0 7px var(--blue);
+      flex-shrink: 0;
+    }
+
+    /* ── Theme toggle button ── */
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: 1px solid var(--border-md);
+      background: var(--surface);
+      cursor: pointer;
+      transition: var(--transition-theme), transform .15s;
+      flex-shrink: 0;
+    }
+
+    .theme-toggle:hover {
+      background: var(--surface-hover);
+      transform: scale(1.06);
+    }
+
+    .theme-toggle svg {
+      width: 16px; height: 16px;
+      fill: none;
+      stroke: var(--text-muted);
+      stroke-width: 1.6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: opacity .2s, transform .3s;
+    }
+
+    .icon-sun  { display: none; }
+    .icon-moon { display: block; }
+    [data-theme="light"] .icon-sun  { display: block; }
+    [data-theme="light"] .icon-moon { display: none; }
+
+    /* ═══════════════════════════════════════════
+       LAYOUT
+    ═══════════════════════════════════════════ */
+    .app-body {
+      display: grid;
+      grid-template-columns: 390px 1fr;
+      height: calc(100vh - 58px);
+    }
+
+    /* ── Scrollable panels ── */
+    .inputs-panel,
+    .results-panel {
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border-md) transparent;
+    }
+    .inputs-panel::-webkit-scrollbar,
+    .results-panel::-webkit-scrollbar { width: 3px; }
+    .inputs-panel::-webkit-scrollbar-thumb,
+    .results-panel::-webkit-scrollbar-thumb {
+      background: var(--border-md);
+      border-radius: 2px;
+    }
+
+    .inputs-panel {
+      border-right: 1px solid var(--border);
+      padding: 24px 20px 48px;
+      transition: var(--transition-theme);
+    }
+
+    .results-panel {
+      padding: 24px 32px 48px;
+    }
+
+    /* ═══════════════════════════════════════════
+       INPUT SECTIONS
+    ═══════════════════════════════════════════ */
+    .inp-section { margin-bottom: 16px; }
+
+    .inp-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 8px;
+      margin-bottom: 2px;
+    }
+
+    .inp-section-header.invest   { background: var(--invest-hdr); }
+    .inp-section-header.variable { background: var(--variable-hdr); }
+    .inp-section-header.fixed    { background: var(--fixed-hdr); }
+    .inp-section-header.goal {
+      background: transparent;
+      border: 1px solid var(--border-md);
+    }
+
+    .inp-section-title {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.92);
+    }
+    .inp-section-header.goal .inp-section-title {
+      color: var(--text-muted);
+    }
+
+    .inp-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 12px;
+      border-radius: 7px;
+      transition: background .12s;
+      gap: 8px;
+    }
+    .inp-row:hover { background: var(--surface-hover); }
+
+    .inp-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+      flex: 1;
+    }
+
+    .inp-ctrl {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+
+    .inp-affix {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+      min-width: 14px;
+    }
+
+    input[type="number"] {
+      background: var(--surface);
+      border: 1px solid var(--border-md);
+      outline: none;
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--blue);
+      text-align: right;
+      width: 88px;
+      padding: 5px 8px;
+      border-radius: 6px;
+      transition: border-color .15s, background .15s, box-shadow .15s;
+      -moz-appearance: textfield;
+      box-shadow: var(--shadow-sm);
+    }
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+    input[type="number"]:hover {
+      border-color: var(--blue);
+      background: var(--blue-bg);
+    }
+    input[type="number"]:focus {
+      border-color: var(--blue);
+      background: var(--blue-hover);
+      box-shadow: 0 0 0 3px rgba(79,142,247,.15);
+    }
+
+    /* ═══════════════════════════════════════════
+       ROAS HERO
+    ═══════════════════════════════════════════ */
+    .roas-hero {
+      background: var(--surface);
+      border: 1px solid var(--border-md);
+      border-radius: 16px;
+      padding: 32px 28px 24px;
+      margin-bottom: 16px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      transition: var(--transition-theme);
+    }
+
+    .roas-glow {
+      position: absolute;
+      bottom: -50px; left: 50%;
+      transform: translateX(-50%);
+      width: 220px; height: 110px;
+      border-radius: 50%;
+      filter: blur(44px);
+      opacity: .8;
+      background: var(--glow-color, rgba(109,190,95,.18));
+      pointer-events: none;
+      transition: background .5s;
+    }
+
+    .roas-eyebrow {
+      font-size: 9px;
+      letter-spacing: .35em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+
+    .roas-number {
+      font-family: 'DM Mono', monospace;
+      font-size: 64px;
+      font-weight: 400;
+      line-height: 1;
+      letter-spacing: -.04em;
+      transition: color .35s;
+    }
+
+    .roas-unit {
+      display: block;
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 5px;
+      font-family: 'DM Mono', monospace;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .roas-tagline {
+      font-size: 11px;
+      color: var(--text-dim);
+      font-family: 'DM Mono', monospace;
+      margin-top: 10px;
+      font-style: italic;
+    }
+
+    /* ROAS gauge pills */
+    .roas-gauge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 16px;
+    }
+
+    .gauge-pip {
+      height: 4px;
+      flex: 1;
+      max-width: 52px;
+      border-radius: 99px;
+      background: var(--border-md);
+      transition: background .4s;
+    }
+
+    .gauge-pip.active-red    { background: var(--red); }
+    .gauge-pip.active-orange { background: var(--orange); }
+    .gauge-pip.active-green  { background: var(--green); }
+
+    .gauge-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: .06em;
+    }
+
+    /* ═══════════════════════════════════════════
+       METRICS GRID
+    ═══════════════════════════════════════════ */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition-theme);
+    }
+
+    .metric-label {
+      font-size: 9px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 5px;
+    }
+
+    .metric-value {
+      font-family: 'DM Mono', monospace;
+      font-size: 18px;
+      font-weight: 400;
+      color: var(--text);
+      letter-spacing: -.02em;
+      transition: color .3s;
+    }
+
+    .metric-sub {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* ═══════════════════════════════════════════
+       RESULT SECTIONS
+    ═══════════════════════════════════════════ */
+    .result-section { margin-bottom: 12px; }
+
+    .result-section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      border-radius: 8px 8px 0 0;
+    }
+
+    .result-section-head.variable { background: var(--variable-hdr); }
+    .result-section-head.fixed {
+      background: var(--fixed-result-bg);
+      border: 1px solid var(--fixed-result-bdr);
+      border-bottom: none;
+    }
+
+    .rsh-title {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+    .result-section-head.variable .rsh-title { color: rgba(255,255,255,.92); }
+    .result-section-head.fixed    .rsh-title { color: var(--fixed-result-text); }
+
+    .rsh-total {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .result-section-head.variable .rsh-total { color: rgba(255,255,255,.85); }
+    .result-section-head.fixed    .rsh-total { color: var(--fixed-result-text); }
+
+    .result-rows-wrap {
+      border: 1px solid var(--border);
+      border-radius: 0 0 8px 8px;
+      overflow: hidden;
+    }
+
+    .result-section-head.variable + .result-rows-wrap {
+      border-top: none;
+    }
+    .result-section-head.fixed + .result-rows-wrap {
+      border-color: var(--fixed-result-bdr);
+      border-top: none;
+    }
+
+    .result-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      transition: background .12s;
+      border-bottom: 1px solid var(--border);
+    }
+    .result-row:last-child { border-bottom: none; }
+    .result-row:hover { background: var(--surface-hover); }
+
+    .result-row-label {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .result-row-value {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--text);
+    }
+
+    /* ═══════════════════════════════════════════
+       MARGEM DE CONTRIBUIÇÃO
+    ═══════════════════════════════════════════ */
+    .contrib-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition-theme);
+    }
+
+    .contrib-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .contrib-label {
+      font-size: 9px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .contrib-pct {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .contrib-value {
+      font-family: 'DM Mono', monospace;
+      font-size: 22px;
+      letter-spacing: -.02em;
+      transition: color .3s;
+    }
+
+    /* ═══════════════════════════════════════════
+       EBITDA CARD
+    ═══════════════════════════════════════════ */
+    .ebitda-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border-md);
+      border-radius: 12px;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 4px;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition-theme);
+    }
+
+    .ebitda-left { display: flex; flex-direction: column; gap: 3px; }
+
+    .ebitda-label {
+      font-size: 10px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .ebitda-meta {
+      font-size: 11px;
+      color: var(--text-dim);
+      font-family: 'DM Mono', monospace;
+    }
+
+    .ebitda-values {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .ebitda-brl {
+      font-family: 'DM Mono', monospace;
+      font-size: 24px;
+      font-weight: 400;
+      letter-spacing: -.03em;
+      transition: color .3s;
+    }
+
+    .ebitda-pct {
+      font-family: 'DM Mono', monospace;
+      font-size: 14px;
+      transition: color .3s;
+    }
+
+    /* ═══════════════════════════════════════════
+       COLOR UTILITIES
+    ═══════════════════════════════════════════ */
+    .c-green  { color: var(--green)  !important; }
+    .c-orange { color: var(--orange) !important; }
+    .c-red    { color: var(--red)    !important; }
+    .c-muted  { color: var(--text-muted) !important; }
+
+    /* ═══════════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════════ */
+    @media (max-width: 860px) {
+      .app-body {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+      .inputs-panel {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+      .app-header { padding: 0 18px; }
+      .header-hint { display: none; }
+      .inputs-panel, .results-panel { padding: 20px 18px 40px; }
+      .roas-number { font-size: 52px; }
+    }
+
+    @media (max-width: 480px) {
+      .metrics-grid { grid-template-columns: 1fr; }
+      .ebitda-card { flex-direction: column; align-items: flex-start; gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════ HEADER ═══════════ -->
+<header class="app-header">
+  <div class="header-left">
+    <span class="header-title">Calculadora de ROAS</span>
+  </div>
+  <div class="header-right">
+    <div class="header-hint">
+      <span class="hint-dot"></span>
+      Edite os campos em azul
+    </div>
+    <button class="theme-toggle" id="theme-btn" title="Alternar tema" aria-label="Alternar modo claro/escuro">
+      <!-- Sun icon (shown in light mode) -->
+      <svg class="icon-sun" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="1"  x2="12" y2="3"/>
+        <line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22"  x2="5.64" y2="5.64"/>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1"  y1="12" x2="3"  y2="12"/>
+        <line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+      <!-- Moon icon (shown in dark mode) -->
+      <svg class="icon-moon" viewBox="0 0 24 24">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<div class="app-body">
+
+  <!-- ═══════════ INPUTS ═══════════ -->
+  <aside class="inputs-panel">
+
+    <!-- Investimento -->
+    <div class="inp-section">
+      <div class="inp-section-header invest">
+        <span class="inp-section-title">Investimento &amp; Performance</span>
+      </div>
+      <div class="inp-row">
+        <span class="inp-label">Investimento (R$)</span>
+        <div class="inp-ctrl">
+          <span class="inp-affix">R$</span>
+          <input type="number" id="investimento" value="50000" min="0" step="100">
+        </div>
+      </div>
+    </div>
+
+    <!-- Custos Variáveis -->
+    <div class="inp-section">
+      <div class="inp-section-header variable">
+        <span class="inp-section-title">Custos Variáveis</span>
+      </div>
+      <div class="inp-row">
+        <span class="inp-label">Frete</span>
+        <div class="inp-ctrl">
+          <input type="number" id="frete" value="10" min="0" max="100" step="0.1">
+          <span class="inp-affix">%</span>
+        </div>
+      </div>
+      <div class="inp-row">
+        <span class="inp-label">Imposto</span>
+        <div class="inp-ctrl">
+          <input type="number" id="imposto" value="9" min="0" max="100" step="0.1">
+          <span class="inp-affix">%</span>
+        </div>
+      </div>
+      <div class="inp-row">
+        <span class="inp-label">Markup</span>
+        <div class="inp-ctrl">
+          <input type="number" id="markup" value="5.6" min="0.01" step="0.1">
+          <span class="inp-affix">×</span>
+        </div>
+      </div>
+      <div class="inp-row">
+        <span class="inp-label">Marketplace</span>
+        <div class="inp-ctrl">
+          <input type="number" id="marketplace" value="2" min="0" max="100" step="0.1">
+          <span class="inp-affix">%</span>
+        </div>
+      </div>
+      <div class="inp-row">
+        <span class="inp-label">Tx. de Cartão</span>
+        <div class="inp-ctrl">
+          <input type="number" id="txcartao" value="7" min="0" max="100" step="0.1">
+          <span class="inp-affix">%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Custos Fixos -->
+    <div class="inp-section">
+      <div class="inp-section-header fixed">
+        <span class="inp-section-title">Custos Fixos</span>
+      </div>
+      <div class="inp-row">
+        <span class="inp-label">Vello</span>
+        <div class="inp-ctrl">
+          <span class="inp-affix">R$</span>
+          <input type="number" id="vello" value="500" min="0" step="50">
+        </div>
+      </div>
+      <div class="inp-row">
+        <span class="inp-label">Plataforma</span>
+        <div class="inp-ctrl">
+          <span class="inp-affix">R$</span>
+          <input type="number" id="plataforma" value="1500" min="0" step="50">
+        </div>
+      </div>
+      <div class="inp-row">
+        <span class="inp-label">Equipe (Operação)</span>
+        <div class="inp-ctrl">
+          <span class="inp-affix">R$</span>
+          <input type="number" id="equipe" value="3000" min="0" step="100">
+        </div>
+      </div>
+      <div class="inp-row">
+        <span class="inp-label">Aluguel</span>
+        <div class="inp-ctrl">
+          <span class="inp-affix">R$</span>
+          <input type="number" id="aluguel" value="2000" min="0" step="100">
+        </div>
+      </div>
+      <div class="inp-row">
+        <span class="inp-label">Condomínio</span>
+        <div class="inp-ctrl">
+          <span class="inp-affix">R$</span>
+          <input type="number" id="condominio" value="500" min="0" step="50">
+        </div>
+      </div>
+      <div class="inp-row">
+        <span class="inp-label">Luz</span>
+        <div class="inp-ctrl">
+          <span class="inp-affix">R$</span>
+          <input type="number" id="luz" value="0" min="0" step="50">
+        </div>
+      </div>
+      <div class="inp-row">
+        <span class="inp-label">Outras pessoas</span>
+        <div class="inp-ctrl">
+          <span class="inp-affix">R$</span>
+          <input type="number" id="outros" value="0" min="0" step="100">
+        </div>
+      </div>
+    </div>
+
+    <!-- Meta Lucro -->
+    <div class="inp-section">
+      <div class="inp-section-header goal">
+        <span class="inp-section-title">Meta de Lucro</span>
+      </div>
+      <div class="inp-row">
+        <span class="inp-label">Lucro desejado</span>
+        <div class="inp-ctrl">
+          <input type="number" id="ebitdameta" value="0" min="-100" max="100" step="0.5">
+          <span class="inp-affix">%</span>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ═══════════ RESULTS ═══════════ -->
+  <section class="results-panel">
+
+    <!-- ROAS Hero -->
+    <div class="roas-hero">
+      <div class="roas-glow" id="roas-glow"></div>
+      <div class="roas-eyebrow">Return on Ad Spend</div>
+      <div class="roas-number" id="roas-val">—</div>
+      <span class="roas-unit">ROAS</span>
+      <div class="roas-tagline" id="roas-desc">—</div>
+      <div class="roas-gauge">
+        <span class="gauge-label c-red" style="font-size:9px">Baixo</span>
+        <div class="gauge-pip" id="pip-1"></div>
+        <div class="gauge-pip" id="pip-2"></div>
+        <span class="gauge-label" id="gauge-mid" style="font-size:9px;color:var(--text-dim)">2×</span>
+        <div class="gauge-pip" id="pip-3"></div>
+        <div class="gauge-pip" id="pip-4"></div>
+        <span class="gauge-label c-green" style="font-size:9px">Ótimo</span>
+      </div>
+    </div>
+
+    <!-- 4 key metrics -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">Faturamento Real</div>
+        <div class="metric-value" id="faturamento-val">—</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">% de Investimento</div>
+        <div class="metric-value" id="pct-invest-val">—</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Custos Variáveis %</div>
+        <div class="metric-value" id="cv-pct-val">—</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Custos Fixos %</div>
+        <div class="metric-value" id="cf-pct-val">—</div>
+        <div class="metric-sub" id="cf-brl-val">—</div>
+      </div>
+    </div>
+
+    <!-- Custos Variáveis breakdown -->
+    <div class="result-section">
+      <div class="result-section-head variable">
+        <span class="rsh-title">Custos Variáveis</span>
+        <span class="rsh-total" id="cv-total-val">—</span>
+      </div>
+      <div class="result-rows-wrap">
+        <div class="result-row">
+          <span class="result-row-label">Frete</span>
+          <span class="result-row-value" id="cv-frete-val">—</span>
+        </div>
+        <div class="result-row">
+          <span class="result-row-label">Imposto</span>
+          <span class="result-row-value" id="cv-imposto-val">—</span>
+        </div>
+        <div class="result-row">
+          <span class="result-row-label">CMV (Markup)</span>
+          <span class="result-row-value" id="cv-markup-val">—</span>
+        </div>
+        <div class="result-row">
+          <span class="result-row-label">Marketplace</span>
+          <span class="result-row-value" id="cv-mkt-val">—</span>
+        </div>
+        <div class="result-row">
+          <span class="result-row-label">Tx. de Cartão</span>
+          <span class="result-row-value" id="cv-cartao-val">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Margem de Contribuição -->
+    <div class="contrib-card">
+      <div class="contrib-header">
+        <span class="contrib-label">Margem de Contribuição</span>
+        <span class="contrib-pct" id="mc-pct-val">—</span>
+      </div>
+      <div class="contrib-value" id="mc-brl-val">—</div>
+    </div>
+
+    <!-- Custos Fixos breakdown -->
+    <div class="result-section">
+      <div class="result-section-head fixed">
+        <span class="rsh-title">Custos Fixos</span>
+        <span class="rsh-total" id="cf-total-val">—</span>
+      </div>
+      <div class="result-rows-wrap">
+        <div class="result-row">
+          <span class="result-row-label">Vello</span>
+          <span class="result-row-value" id="cf-vello-val">—</span>
+        </div>
+        <div class="result-row">
+          <span class="result-row-label">Plataforma</span>
+          <span class="result-row-value" id="cf-plat-val">—</span>
+        </div>
+        <div class="result-row">
+          <span class="result-row-label">Equipe (Operação)</span>
+          <span class="result-row-value" id="cf-equipe-val">—</span>
+        </div>
+        <div class="result-row">
+          <span class="result-row-label">Aluguel</span>
+          <span class="result-row-value" id="cf-aluguel-val">—</span>
+        </div>
+        <div class="result-row">
+          <span class="result-row-label">Condomínio</span>
+          <span class="result-row-value" id="cf-cond-val">—</span>
+        </div>
+        <div class="result-row">
+          <span class="result-row-label">Luz</span>
+          <span class="result-row-value" id="cf-luz-val">—</span>
+        </div>
+        <div class="result-row">
+          <span class="result-row-label">Outras pessoas</span>
+          <span class="result-row-value" id="cf-outros-val">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lucro -->
+    <div class="ebitda-card">
+      <div class="ebitda-left">
+        <span class="ebitda-label">Lucro Real</span>
+        <span class="ebitda-meta" id="ebitda-meta-desc">Meta: 0%</span>
+      </div>
+      <div class="ebitda-values">
+        <span class="ebitda-brl" id="ebitda-brl-val">—</span>
+        <span class="ebitda-pct" id="ebitda-pct-val">—</span>
+      </div>
+    </div>
+
+  </section>
+</div>
+
+<script>
+  /* ── Helpers ── */
+  const $  = id => document.getElementById(id);
+  const num = id => parseFloat($(id).value) || 0;
+
+  const BRL = v => new Intl.NumberFormat('pt-BR', {
+    style: 'currency', currency: 'BRL', maximumFractionDigits: 2
+  }).format(v);
+
+  const PCT = (v, dec = 1) => (v * 100).toFixed(dec) + '%';
+
+  function colorClass(v) {
+    if (v > 0) return 'c-green';
+    if (v < 0) return 'c-red';
+    return 'c-muted';
+  }
+
+  function setColor(el, cls) {
+    el.classList.remove('c-green', 'c-orange', 'c-red', 'c-muted');
+    if (cls) el.classList.add(cls);
+  }
+
+  /* ── Gauge update ── */
+  function updateGauge(roas) {
+    const pips = [$('pip-1'), $('pip-2'), $('pip-3'), $('pip-4')];
+    pips.forEach(p => p.className = 'gauge-pip');
+
+    if (roas < 2) {
+      pips[0].classList.add('active-red');
+    } else if (roas < 3) {
+      pips[0].classList.add('active-orange');
+      pips[1].classList.add('active-orange');
+    } else if (roas < 4) {
+      pips[0].classList.add('active-green');
+      pips[1].classList.add('active-green');
+      pips[2].classList.add('active-green');
+    } else {
+      pips.forEach(p => p.classList.add('active-green'));
+    }
+
+    $('gauge-mid').textContent = roas >= 2 ? `${roas.toFixed(1)}×` : '2×';
+  }
+
+  /* ── Main calculation ── */
+  function calculate() {
+    const investimento = num('investimento');
+    const frete        = num('frete')       / 100;
+    const imposto      = num('imposto')     / 100;
+    const markup       = num('markup')      || 1;
+    const marketplace  = num('marketplace') / 100;
+    const txCartao     = num('txcartao')    / 100;
+
+    const vello      = num('vello');
+    const plataforma = num('plataforma');
+    const equipe     = num('equipe');
+    const aluguel    = num('aluguel');
+    const condominio = num('condominio');
+    const luz        = num('luz');
+    const outros     = num('outros');
+
+    const ebitdaMeta = num('ebitdameta') / 100;
+
+    /* F-column: % basis on R$100 */
+    const F10 = 100;
+    const F11 = frete * F10;
+    const F12 = imposto * (F10 - F11);
+    const F13 = (F10 - F11) / markup;
+    const F14 = marketplace * (F10 - F11);
+    const F15 = txCartao * (F10 - F11);
+    const F16 = F11 + F12 + F13 + F14 + F15;
+    const F29 = ebitdaMeta * 100;
+
+    /* Custos fixos totais */
+    const C19 = vello + plataforma + equipe + aluguel + condominio + luz + outros;
+
+    /* Faturamento Real */
+    const denom = 1 - (F16 / 100 + F29 / 100);
+    const C9 = denom > 0 ? (C19 + investimento) / denom : 0;
+
+    /* D-column: R$ values */
+    const D11 = frete * C9;
+    const D12 = imposto * (C9 - D11);
+    const D13 = (C9 - D11) / markup;
+    const D14 = marketplace * (C9 - D11);
+    const D15 = txCartao * (C9 - D11);
+    const D10 = D11 + D12 + D13 + D14 + D15;
+
+    /* Derived */
+    const roas      = investimento > 0 ? C9 / investimento : 0;
+    const pctInvest = C9 > 0 ? investimento / C9 : 0;
+    const C16       = F16 / 100;
+    const C17       = C9 - D10;
+    const C18       = C9 > 0 ? C17 / C9 : 0;
+    const C27       = C9 > 0 ? C19 / C9 : 0;
+    const C28       = C9 - D10 - C19 - investimento;
+    const ebitdaPct = C9 > 0 ? C28 / C9 : 0;
+
+    /* ── ROAS hero ── */
+    const roasEl = $('roas-val');
+    roasEl.textContent = roas.toFixed(2) + 'x';
+    const roasColor = roas >= 3 ? 'c-green' : roas >= 2 ? 'c-orange' : 'c-red';
+    setColor(roasEl, roasColor);
+
+    const glowColor = roas >= 3
+      ? 'rgba(109,190,95,.22)'
+      : roas >= 2
+        ? 'rgba(245,163,58,.22)'
+        : 'rgba(226,75,56,.22)';
+    $('roas-glow').style.background = glowColor;
+
+    $('roas-desc').textContent =
+      `Para cada R$ 1,00 investido → R$ ${roas.toFixed(2)} em faturamento`;
+    updateGauge(roas);
+
+    /* ── Metrics ── */
+    $('faturamento-val').textContent = BRL(C9);
+    $('pct-invest-val').textContent  = PCT(pctInvest);
+    $('cv-pct-val').textContent      = PCT(C16);
+    $('cf-pct-val').textContent      = PCT(C27);
+    $('cf-brl-val').textContent      = BRL(C19);
+
+    /* ── Custos variáveis ── */
+    $('cv-total-val').textContent   = BRL(D10);
+    $('cv-frete-val').textContent   = BRL(D11);
+    $('cv-imposto-val').textContent = BRL(D12);
+    $('cv-markup-val').textContent  = BRL(D13);
+    $('cv-mkt-val').textContent     = BRL(D14);
+    $('cv-cartao-val').textContent  = BRL(D15);
+
+    /* ── Margem de contribuição ── */
+    const mcEl = $('mc-brl-val');
+    mcEl.textContent = BRL(C17);
+    setColor(mcEl, colorClass(C17));
+    $('mc-pct-val').textContent = PCT(C18);
+
+    /* ── Custos fixos ── */
+    $('cf-total-val').textContent   = BRL(C19);
+    $('cf-vello-val').textContent   = BRL(vello);
+    $('cf-plat-val').textContent    = BRL(plataforma);
+    $('cf-equipe-val').textContent  = BRL(equipe);
+    $('cf-aluguel-val').textContent = BRL(aluguel);
+    $('cf-cond-val').textContent    = BRL(condominio);
+    $('cf-luz-val').textContent     = BRL(luz);
+    $('cf-outros-val').textContent  = BRL(outros);
+
+    /* ── EBITDA ── */
+    const ebitdaBrlEl = $('ebitda-brl-val');
+    const ebitdaPctEl = $('ebitda-pct-val');
+    ebitdaBrlEl.textContent = BRL(C28);
+    ebitdaPctEl.textContent = PCT(ebitdaPct);
+    const ec = colorClass(C28);
+    setColor(ebitdaBrlEl, ec);
+    setColor(ebitdaPctEl, ec);
+    $('ebitda-meta-desc').textContent = `Meta: ${(ebitdaMeta * 100).toFixed(1)}%`;
+  }
+
+  /* ── Theme toggle ── */
+  const html = document.documentElement;
+  const stored = localStorage.getItem('roas-theme');
+  if (stored) html.setAttribute('data-theme', stored);
+
+  $('theme-btn').addEventListener('click', () => {
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('roas-theme', next);
+  });
+
+  /* ── Wire inputs ── */
+  document.querySelectorAll('input[type="number"]').forEach(el => {
+    el.addEventListener('input', calculate);
+  });
+
+  calculate();
+</script>
+</body>
+</html>
